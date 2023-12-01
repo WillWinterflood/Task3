@@ -25,10 +25,23 @@ void tokeniseRecord(char *record, char delimiter, char *date, char *time, int *s
     }
 }
 
+int compareDescending(const void *a, const void *b) {
+    return (*(int *)b - *(int *)a);
+}
+
 
 int main() {
-    char FileName[1000];
     FILE *file;
+    char FileName[] = "FitnessData_2023.csv";
+    int buffer = 250;
+    char read[buffer];
+    int steps;
+    char date[11];
+    char time[6];
+    int x = 0;
+    char NewFilename[] = "FitnessData_2023.csv.tsv";
+    FILE *NewFile;
+
 
     printf("Enter Filename: ");
     scanf("%s", FileName);
@@ -40,8 +53,32 @@ int main() {
 
     }
     printf("File successfully loaded.\n");
-    fclose(file);
+    
 
+
+    
+
+
+    while (fgets(read, buffer, file) != NULL) {
+        char CSteps[100];
+        // Declaring them all as characters to tokenise is, as thye cannot be tokenised as integers.
+        tokeniseRecord(read, ",", date[x], time[x], CSteps);
+        steps = atoi(CSteps);
+        x++;
+         
+
+    }
+
+    qsort(file, x, sizeof(steps), compareDescending);
+    NewFile = fopen(NewFilename, "w");
+    if (NewFile == NULL) {
+        perror("Error");
+        return 1;
+    }
+
+
+
+    return 0;
 
     
     
