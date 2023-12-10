@@ -25,61 +25,95 @@ void tokeniseRecord(char *record, char delimiter, char *date, char *time, int *s
     }
 }
 
-int compareDescending(const void *a, const void *b) {
-    return (*(int *)b - *(int *)a);
+void BubbleSort(FitnessData *array, int length) {
+    int swapped = 1;
+
+    while (swapped == 1) {
+        //While loop that keeps going through the file until it is all sorted
+        swapped = 0;
+
+        int i;
+        for (i = 0; i < length - 1; i++) {
+            if (array[i].steps < array[i + 1].steps) {
+            // This if statement is saying that if the steps of this line is less than the amount of 
+            //  steps on the next line then..
+
+                FitnessData temp;
+                temp = array[i];
+                array[i] = array[i + 1];
+                array[i  + 1] = temp;
+                //  ... then it makes the line befroe = to the line after thus swapping the lines
+
+                swapped = 1;
+            }
+        }
+    }
 }
 
 
 int main() {
-    FILE *file;
-    char FileName[] = "FitnessData_2023.csv";
-    int buffer = 250;
-    char read[buffer];
+
+    int buffer_size = 1000;
     int steps;
     char date[11];
     char time[6];
-    int x = 0;
-    char NewFilename[] = "FitnessData_2023.csv.tsv";
-    FILE *NewFile;
+    char FileName[1000];
+    FILE *file;
+    char line[buffer_size];
+    char filename[buffer_size];
+    int count = 0;
+    int Max_Records = 1000;
+    FitnessData array[Max_Records];
 
-
-    printf("Enter Filename: ");
+    printf("Input Filename: ");
     scanf("%s", FileName);
     file = fopen(FileName, "r");
     if (file == NULL) {
-        perror("Error: could not find or open the file. \n");
+        perror("Error: Invalid File\n");
         // Error message.
-            return 1;
+        return 1;
+    }
+    while (fgets(line, sizeof(line), file) != NULL) {
+        int day;
+        int month;
+        int year;
+        int hours;
+        int minutes;
+
+        int valid = sscanf(line, "%d-%d-%d,%d:%d,%d", &year, &month, &day, &hours, &minutes, &steps);
+        if (valid != 6) {
+            perror("Error: Invalid File\n");
+        }
 
     }
     printf("File successfully loaded.\n");
-    
-
-
-    
-
-
-    while (fgets(read, buffer, file) != NULL) {
-        char CSteps[100];
-        // Declaring them all as characters to tokenise is, as thye cannot be tokenised as integers.
-        tokeniseRecord(read, ",", date[x], time[x], CSteps);
-        steps = atoi(CSteps);
-        x++;
-         
-
+    //declaring all my variables im going to use in this case
+    //This holds each individual lines date and time value as the while loop is going through it.
+    rewind(file);
+    while (fgets(line, buffer_size, file) != NULL && count < Max_Records) {
+        tokeniseRecord(line ,',' , date ,time , &array[count].steps);
+        strcpy(array[count].time, time);
+        strcpy(array[count].date, date);
+        //splits the line up when theres a comma
+        count = count + 1;
     }
+    fclose(file);
+    //First part of code is done, now we need to write it to the new file.
 
-    qsort(file, x, sizeof(steps), compareDescending);
-    NewFile = fopen(NewFilename, "w");
-    if (NewFile == NULL) {
-        perror("Error");
+    BubbleSort(array, count);
+    char OutFileName[] = "FitnessData_2023.csv.tsv";
+    FILE *OutputFile;
+
+    OutputFile = fopen(OutFileName, "w");
+    if (OutputFile == NULL) {
+        perror("Error: Invalid File");
         return 1;
     }
 
-
-
+    for (int i = 0; i < count; i++ ) 
+    {
+        fprintf(OutputFile, "%s\t%s\t%d\n", array[i].date, array[i].time, array[i].steps);
+    }
+    fclose(OutputFile); 
     return 0;
-
-    
-    
 }
