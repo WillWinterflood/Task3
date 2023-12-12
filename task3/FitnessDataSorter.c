@@ -26,22 +26,23 @@ void tokeniseRecord(char *record, char delimiter, char *date, char *time, int *s
 }
 
 void BubbleSort(FitnessData *array, int length) {
+    //Using a bubble sort to sort the data in descending order
     int swapped = 1;
 
     while (swapped == 1) {
         //While loop that keeps going through the file until it is all sorted
         swapped = 0;
 
-        int i;
-        for (i = 0; i < length - 1; i++) {
-            if (array[i].steps < array[i + 1].steps) {
+        int x;
+        for (x = 0; x < length - 1; x++) {
+            if (array[x].steps < array[x + 1].steps) {
             // This if statement is saying that if the steps of this line is less than the amount of 
             //  steps on the next line then..
 
-                FitnessData temp;
-                temp = array[i];
-                array[i] = array[i + 1];
-                array[i  + 1] = temp;
+                FitnessData TempValue;
+                TempValue = array[x];
+                array[x] = array[x + 1];
+                array[x  + 1] = TempValue;
                 //  ... then it makes the line befroe = to the line after thus swapping the lines
 
                 swapped = 1;
@@ -64,6 +65,7 @@ int main() {
     int count = 0;
     int Max_Records = 1000;
     FitnessData array[Max_Records];
+    //the amount of things in this array is the amount that is max records.
 
     printf("Input Filename: ");
     scanf("%s", FileName);
@@ -79,29 +81,37 @@ int main() {
         int year;
         int hours;
         int minutes;
+        //This is another error checker
 
         int valid = sscanf(line, "%d-%d-%d,%d:%d,%d", &year, &month, &day, &hours, &minutes, &steps);
+        //checking that everything is in the correct format
         if (valid != 6) {
+            //If the correct format doesnt apply to at least 1 of these then it will print an error
             perror("Error: Invalid File\n");
         }
 
     }
     printf("File successfully loaded.\n");
-    //declaring all my variables im going to use in this case
-    //This holds each individual lines date and time value as the while loop is going through it.
     rewind(file);
+    //After the first while loop we need to rewind the file.
     while (fgets(line, buffer_size, file) != NULL && count < Max_Records) {
         tokeniseRecord(line ,',' , date ,time , &array[count].steps);
+        //splits the line up when theres a comma
         strcpy(array[count].time, time);
         strcpy(array[count].date, date);
-        //splits the line up when theres a comma
+        //strcpy is useful here as it allows the time and date to be added to an array
+        
         count = count + 1;
     }
     fclose(file);
     //First part of code is done, now we need to write it to the new file.
 
     BubbleSort(array, count);
-    char OutFileName[] = "FitnessData_2023.csv.tsv";
+    char OutFileName[buffer_size];
+    sprintf(OutFileName, "%s.tsv", FileName);
+    //to ensure the filename has .tsv on the end
+    // Cant do strcat because there was an error saying that there was too many arguments 
+    //   therefore sprintf is good to use, as the string needs to be printed.
     FILE *OutputFile;
 
     OutputFile = fopen(OutFileName, "w");
@@ -110,9 +120,10 @@ int main() {
         return 1;
     }
 
-    for (int i = 0; i < count; i++ ) 
+    for (int x = 0; x < count; x++ ) 
     {
-        fprintf(OutputFile, "%s\t%s\t%d\n", array[i].date, array[i].time, array[i].steps);
+        fprintf(OutputFile, "%s\t%s\t%d\n", array[x].date, array[x].time, array[x].steps);
+        //fprintf to print this into the new sorted file. 
     }
     fclose(OutputFile); 
     return 0;
